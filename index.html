@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตีคนเวอร์ๆ สำหรับ iPad 🐹💥</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive;
+  background: linear-gradient(to bottom, #a0e7ff, #b4f8c8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #ff4d6d;
+  text-shadow: 2px 2px #fff;
+  margin-top: 10px;
+  text-align: center;
+}
+
+#score, #time {
+  font-size: 1.5em;
+  margin: 5px;
+  color: #333;
+}
+
+#gameArea {
+  position: relative;
+  width: 90vw;  /* ปรับตามหน้าจอ iPad */
+  max-width: 700px;
+  height: 60vh; /* สูงตามความสูงหน้าจอ */
+  background: #ffd6a5;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 15px;
+  padding: 15px;
+  box-shadow: 0 0 20px #ffb347;
+}
+
+.hole {
+  position: relative;
+  background: #ffadad;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: inset 0 -10px 10px rgba(0,0,0,0.3);
+}
+
+.mole-img {
+  position: absolute;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 60%;
+  transition: bottom 0.3s ease;
+}
+
+.mole-img.pop {
+  bottom: 0;
+}
+
+.mole-img.hit {
+  transform: translateX(-50%) scale(0.8);
+  transition: transform 0.1s;
+}
+
+#hammer {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s;
+}
+</style>
+</head>
+<body>
+
+<h1>ตีคนเวอร์ๆ สำหรับ iPad 🐹💥</h1>
+<div id="score">คะแนน: 0</div>
+<div id="time">เวลา: 30 วินาที</div>
+<div id="gameArea">
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+  <div class="hole"><img class="mole-img" src="person.png" alt="Person"></div>
+</div>
+
+<img id="hammer" src="hammer.png" alt="Hammer">
+
+<script>
+const moles = document.querySelectorAll('.mole-img');
+let score = 0;
+let time = 30;
+const scoreDisplay = document.getElementById('score');
+const timeDisplay = document.getElementById('time');
+const hammer = document.getElementById('hammer');
+
+function randomMole() {
+  const index = Math.floor(Math.random() * moles.length);
+  return moles[index];
+}
+
+function popMole() {
+  const mole = randomMole();
+  if (mole.classList.contains('pop')) return;
+  mole.classList.add('pop');
+  setTimeout(() => mole.classList.remove('pop'), 800);
+}
+
+// ฟังก์ชันตีตุ่นแบบ touch
+moles.forEach(mole => {
+  mole.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // ป้องกัน scroll
+    if (!mole.classList.contains('pop')) return;
+    score++;
+    scoreDisplay.textContent = 'คะแนน: ' + score;
+    mole.classList.add('hit');
+    setTimeout(() => mole.classList.remove('hit'), 200);
+    mole.classList.remove('pop');
+
+    // ค้อนตามนิ้ว
+    const touch = e.touches[0];
+    hammer.style.transform = `translate(${touch.pageX}px, ${touch.pageY}px) rotate(-20deg)`;
+    setTimeout(() => {
+      hammer.style.transform = `translate(${touch.pageX}px, ${touch.pageY}px) rotate(0deg)`;
+    }, 100);
+  });
+});
+
+// โผล่ตุ่นทุก 0.9 วินาที
+const moleInterval = setInterval(popMole, 900);
+
+// นับถอยหลังเวลา
+const timer = setInterval(() => {
+  time--;
+  timeDisplay.textContent = 'เวลา: ' + time + ' วินาที';
+  if (time <= 0) {
+    clearInterval(timer);
+    clearInterval(moleInterval);
+    alert('หมดเวลา! คะแนนของคุณ: ' + score);
+  }
+}, 1000);
+
+// ค้อนตามนิ้ว
+document.addEventListener('touchmove', (e) => {
+  const touch = e.touches[0];
+  hammer.style.left = touch.pageX + 'px';
+  hammer.style.top = touch.pageY + 'px';
+}, {passive: false});
+</script>
+
+</body>
+</html>
